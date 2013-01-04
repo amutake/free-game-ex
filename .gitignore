@@ -1,0 +1,5 @@
+cabal-dev/
+dist/
+
+logo.png
+test.hs
