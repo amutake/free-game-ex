@@ -6,15 +6,13 @@ import Data.Vect
 import Graphics.FreeGame
 
 import Lib.Field
-import Lib.Settings
-
-import Debug.Trace
+import Lib.Util
 
 data Current = Ground | Air deriving (Show, Eq)
 
 action :: (?player :: Picture, ?block :: Picture)
        => Vec2 -> Vec2 -> Current -> Game ()
-action pos@(Vec2 x y) vel@(Vec2 dx dy) Ground = do
+action pos vel@(Vec2 dx _) Ground = do
 
     drawPicture $ Translate pos ?player
     drawField
@@ -36,8 +34,8 @@ action pos@(Vec2 x y) vel@(Vec2 dx dy) Ground = do
         vel' = Vec2 dx' dy'
         next = if keyU || not (downCollision pos) then Air else Ground
     tick
-    action (pos &+ vel) vel' (trace (show next) next)
-action pos@(Vec2 x y) vel@(Vec2 dx dy) Air = do
+    action (pos &+ vel) vel' next
+action pos vel@(Vec2 dx dy) Air = do
     drawPicture $ Translate pos ?player
     drawField
 
@@ -57,7 +55,7 @@ action pos@(Vec2 x y) vel@(Vec2 dx dy) Air = do
         vel' = Vec2 dx' dy'
         next = if downCollision pos then Ground else Air
     tick
-    action (pos &+ vel) vel' (trace (show next) next)
+    action (pos &+ vel) vel' next
 
 slow :: Float -> Float
 slow x
@@ -90,17 +88,3 @@ leftCollision :: Vec2 -> Bool
 leftCollision pos = Map.findWithDefault N leftPos field == B
   where
     leftPos = mapFst (\x -> x - 1) $ toTuple pos
-
-toTuple :: Vec2 -> (Int, Int)
-toTuple (Vec2 x y) = (f x, f y)
-  where
-    f a = round $ (a + blockSize / 2) / blockSize
-
-mapFst :: (a -> c) -> (a, b) -> (c, b)
-mapFst f (a, b) = (f a, b)
-
-mapSnd :: (b -> c) -> (a, b) -> (a, c)
-mapSnd = fmap
-
-mapTup :: (a -> b) -> (a, a) -> (b, b)
-mapTup f = mapSnd f . mapFst f

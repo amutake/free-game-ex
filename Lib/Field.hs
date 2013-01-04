@@ -2,14 +2,14 @@
 
 module Lib.Field where
 
-import Control.Monad (forM_, when)
+import Control.Monad (forM_)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe (catMaybes)
 import Data.Vect
 import Graphics.FreeGame
 
-import Lib.Settings
+import Lib.Util
 
 type Field = Map (Int, Int) Block
 
@@ -55,12 +55,6 @@ blockPos field' block = catMaybes $ map f keys
     f k = case Map.lookup k field' of
         Just b -> if b == block then Just k else Nothing
         Nothing -> Nothing
-
-toVec2 :: (Int, Int) -> Vec2
-toVec2 = uncurry Vec2 . mapT f
-  where
-    mapT g (a, b) = (g a, g b)
-    f x = blockSize * (fromIntegral x) - blockSize / 2
 
 drawField :: (?block :: Picture) => Game ()
 drawField = forM_ keys $ \k -> drawBlock k $ f k
